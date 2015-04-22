@@ -1,0 +1,88 @@
+#pragma hdrstop
+#include "Unit2.h"
+#pragma package(smart_init)
+
+#include <algorithm>
+
+TCore::TCore()
+{
+
+}
+
+bool TCore::SetWord(const WORDS id, std::string word)
+{
+	if (word.empty())
+		return false;
+
+	switch (id)
+	{
+		case BEGIN: m_strBegin = word;	break;
+		case END:   m_strEnd   = word;	break;
+		default:	return false;
+	}
+
+	return true;
+}
+
+bool TCore::SetMap(const TDStringVector map)
+{
+	if (map.empty())
+		return false;
+
+	m_vctMap = map;
+}
+
+bool UniqueFunc(std::string first, std::string second)
+{
+	return (first == second);
+}
+
+void TCore::Find()
+{
+	if (m_vctMap.empty() || m_strBegin.empty() || m_strEnd.empty())
+		return;
+
+	if (m_strBegin == m_strEnd)
+		return;
+
+	if (m_strBegin.size() != m_strEnd.size())
+		return;
+
+	TDStringVector tempLst = m_vctMap;
+	TDStringVector WordChains;
+	std::unique (tempLst.begin(), tempLst.end(), UniqueFunc);
+
+	for (TDStringVector::iterator itr = tempLst.begin(); itr != tempLst.end(); )
+	{
+		if ((*itr).size() != m_strBegin.size())
+			itr = tempLst.erase(itr);
+		else
+			++itr;
+	}
+
+	if (tempLst.empty())
+		return;
+	
+	for (size_t i = 0; i < tempLst.size(); ++i) 
+	{
+		std::string tempWord = tempLst[i];
+	
+		if (tempWord == m_strBegin || tempWord == m_strEnd)
+			continue;
+
+		if (GetDiff(m_strBegin, tempWord) && GetDiff(tempWord, m_strEnd)
+	}
+}
+
+int TCore::GetDiff(std::string first, std::string second)
+{
+	size_t uiCount = 0;
+	
+	for (size_t i = 0; i < first.size(); ++i)
+	{
+		if (first[i] == second[i])
+			++uiCount;	
+	}
+
+	return first.size() - uiCount;
+}

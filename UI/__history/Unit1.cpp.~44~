@@ -1,0 +1,108 @@
+#include <vcl.h>
+#pragma hdrstop
+
+#include "Unit1.h"
+#include "Unit2.h"
+
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm1 *Form1;
+TCore  *pCore;
+
+__fastcall TForm1::TForm1(TComponent* Owner) : TForm(Owner)
+{
+	Constraints->MinHeight = 270;
+	Constraints->MinWidth  = 385;
+	Constraints->MaxWidth  = 385;
+	Form1->Width  = Constraints->MinWidth;
+	Form1->Height = Constraints->MinHeight;
+
+    Memo1->Clear();
+
+	m_bOpenSession = false;
+	FindWordsMenu->Visible = false;
+
+	pCore = new TCore();
+}
+
+void __fastcall TForm1::OpenWordsMenuClick(TObject *Sender)
+{
+	if (OpenDialog1->Execute())
+	{
+		TStringList *pList = new TStringList();
+		pList->LoadFromFile(OpenDialog1->FileName);
+
+		if (pList->Count < 2)
+		{
+			return;
+		}
+
+		BeginEdit->Text =
+		EndEdit->Text   =
+
+		pCore->SetWord(BEGIN, static_cast<AnsiString>(pList->Strings[0]).c_str());
+        pCore->SetWord(END,   static_cast<AnsiString>(pList->Strings[1]).c_str());
+		CheckMenu(OpenWordsMenu);
+
+		delete pList;
+	}
+}
+
+void __fastcall TForm1::OpenMapMenuClick(TObject *Sender)
+{
+	if (OpenDialog1->Execute())
+	{
+		TStringList *pList = new TStringList();
+		pList->LoadFromFile(OpenDialog1->FileName);
+
+		if (pList->Count < 2)
+		{
+			return;
+		}
+
+		TDStringVector StringVct;
+		for (int i = 0; i < pList->Count; ++i)
+			StringVct.push_back(static_cast<AnsiString>(pList->Strings[i]).c_str());
+
+		pCore->SetMap(StringVct);
+		CheckMenu(OpenMapMenu);
+
+		delete pList;
+	}
+}
+
+void __fastcall TForm1::FindWordsMenuClick(TObject *Sender)
+{
+	pCore->Find();
+
+	TDStringVector lstWords = pCore->GetList();
+	StringGrid1->RowCount = lstWords.size()+1;
+
+	for (TDStringVector::iterator itr = lstWords.begin(); itr != lstWords.end(); ++itr)
+	{
+        static __int32 ARow = 1;
+		StringGrid1->Cells[0][ARow++] = (*itr).c_str();
+	}
+}
+
+void TForm1::CheckMenu(TObject *Sender)
+{
+	if (TMenuItem* pItem = dynamic_cast<TMenuItem*>(Sender))
+	{
+    	pItem->Checked = true;
+	}
+
+	if (OpenWordsMenu->Checked && OpenMapMenu->Checked)
+	{
+		m_bOpenSession = true;
+		FindWordsMenuClick(this);
+	}
+}
+
+void __fastcall TForm1::FormResize(TObject *Sender)
+{
+	StringGrid1->Height = Form1->Height - StringGrid1->Top - 65;
+	Memo1->Height		= StringGrid1->Height + StringGrid1->Top - 8;
+}
+
+

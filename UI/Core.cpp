@@ -1,0 +1,161 @@
+#pragma hdrstop
+#include "Form.h"
+#include "Core.h"
+#pragma package(smart_init)
+
+#include <algorithm>
+#include <sstream>
+
+TCore::TCore()
+{
+
+}
+
+bool TCore::SetWord(const WORDS id, std::string word)
+{
+	if (word.empty())
+		return false;
+
+	switch (id)
+	{
+		case BEGIN: m_strBegin = word;	break;
+		case END:   m_strEnd   = word;	break;
+		default:	return false;
+	}
+
+	return true;
+}
+
+bool TCore::SetMap(const TDStringVector map)
+{
+	if (map.empty())
+		return false;
+
+	m_vctMap = map;
+}
+
+bool UniqueFunc(std::string first, std::string second)
+{
+	return (first == second);
+}
+
+void TCore::Find()
+{
+	if (m_vctMap.empty() || m_strBegin.empty() || m_strEnd.empty())
+		return;
+
+	if (m_strBegin == m_strEnd)
+		return;
+
+	if (m_strBegin.size() != m_strEnd.size())
+		return;
+
+	TDStringVector editLst = m_vctMap;
+	std::unique (editLst.begin(), editLst.end(), UniqueFunc);
+
+	for (TDStringVector::iterator itr = editLst.begin(); itr != editLst.end(); )
+	{
+		if ((*itr).size() != m_strBegin.size())
+			itr = editLst.erase(itr);
+		else
+			++itr;
+	}
+
+	if (editLst.empty())
+		return;
+	
+	for (size_t i = 0; i < editLst.size(); ++i)
+	{
+		std::string tempWord = editLst[i];
+	
+		if (tempWord == m_strBegin || tempWord == m_strEnd)
+			continue;
+
+		// fast search
+		if (GetDiff(m_strBegin, tempWord) == 1 && GetDiff(tempWord, m_strEnd) == 1)
+		{
+			Form1->Memo1->Lines->Add(m_strBegin.c_str());
+			Form1->Memo1->Lines->Add(tempWord.c_str());
+			Form1->Memo1->Lines->Add(m_strEnd.c_str());
+			return;
+		}
+	}
+
+	TDStringVector WordChains(editLst.size());
+
+	for (size_t i = 0; i < editLst.size(); ++i)
+	{
+		TDStringVector tempLst = editLst;
+
+		for (TDStringVector::iterator itr = tempLst.begin(); itr != tempLst.end(); /*++itr*/)
+		{
+			std::string Word = *itr;
+
+			if (Word == m_strBegin || Word == m_strEnd)
+			{
+				itr = tempLst.erase(itr);
+				continue;
+			}
+
+			std::string preWord = GetPrev(WordChains[i]);
+
+			if (GetDiff(preWord, Word) == 1)
+			{
+				WordChains[i] += ("-" + Word);
+
+				if (GetDiff(Word, m_strEnd) == 1)
+				{
+					WordChains[i] += ("-" + m_strEnd);
+					break;
+				}
+
+				tempLst.erase(itr);
+				itr = tempLst.begin();
+				continue;
+			}
+
+
+			++itr;
+		}
+	}
+
+	{   // operations
+		size_t minLenght = WordChains[0].size();
+		for (size_t i = 0; i < WordChains.size(); ++i)
+		{
+			if (minLenght > WordChains[i].size())
+				minLenght = WordChains[i].size();
+		}
+
+		for (TDStringVector::iterator itr = WordChains.begin(); itr != WordChains.end(); /*++itr*/)
+			itr = ( (*itr).size() > minLenght ? WordChains.erase(itr) : itr + 1);
+	}
+
+	char* tempString = strdup(WordChains[0].c_str());
+	for (char* pch = strtok(tempString, "-"); pch != NULL; pch = strtok(NULL, "-"))
+		Form1->Memo1->Lines->Add(pch);
+}
+
+int TCore::GetDiff(std::string first, std::string second)
+{
+	size_t uiCount = 0;
+	
+	for (size_t i = 0; i < first.size(); ++i)
+	{
+		if (first[i] == second[i])
+			++uiCount;	
+	}
+
+	return first.size() - uiCount;
+}
+
+std::string TCore::GetPrev(std::string &Chain)
+{
+	if (Chain.empty())
+	{
+		Chain += m_strBegin;
+		return Chain;
+	}
+
+	return Chain.substr(Chain.rfind("-") + 1);
+}

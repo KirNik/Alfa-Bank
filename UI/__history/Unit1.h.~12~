@@ -1,0 +1,42 @@
+#ifndef Unit1H
+#define Unit1H
+
+#include <System.Classes.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+#include <Vcl.Grids.hpp>
+#include <Vcl.Menus.hpp>
+#include <Vcl.Dialogs.hpp>
+
+class TForm1 : public TForm
+{
+	__published:	// IDE-managed Components
+		TMainMenu 	*MainMenu1;
+		TMenuItem 	*FileMenu;
+		TMenuItem	*OpenWordsMenu;
+		TMenuItem	*OpenMapMenu;
+		TMenuItem	*FindWordsMenu;
+		TStringGrid *StringGrid1;
+		TMemo 		*Memo1;
+		TEdit 		*BeginEdit;
+		TEdit 		*EndEdit;
+	TOpenDialog *OpenDialog1;
+
+		void __fastcall OpenWordsMenuClick(TObject *Sender);
+		void __fastcall OpenMapMenuClick(TObject *Sender);
+		void __fastcall FindWordsMenuClick(TObject *Sender);
+		void __fastcall FormResize(TObject *Sender);
+
+	private:
+		bool m_bOpenSession;
+		void CheckMenu(TObject *Sender);
+
+	public:
+		__fastcall TForm1(TComponent* Owner);
+
+};
+
+extern PACKAGE TForm1 *Form1;
+
+#endif

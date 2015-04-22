@@ -1,0 +1,37 @@
+#ifndef Unit2H
+#define Unit2H
+
+#include <string>
+#include <list>
+
+typedef std::list<std::string> TDStringList;
+
+enum WORDS
+{
+	BEGIN,
+	END
+};
+
+class TCore
+{
+	public:
+		TCore();
+
+		bool SetWord(const WORDS /*id*/, std::string /*word*/);
+		bool SetMap(const TDStringList /*map*/);
+		void Find();
+
+		TDStringList const GetList() { return m_lstMap; }
+		bool UselessLength (const std::string& word);
+
+	private:
+
+
+		std::string  m_strBegin;
+		std::string  m_strEnd;
+		TDStringList m_lstMap;
+};
+
+extern TCore *pCore;
+
+#endif
