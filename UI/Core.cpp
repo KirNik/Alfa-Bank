@@ -129,6 +129,15 @@ void TCore::Find()
 
 		for (TDStringVector::iterator itr = WordChains.begin(); itr != WordChains.end(); /*++itr*/)
 			itr = ( (*itr).size() > minLenght ? WordChains.erase(itr) : itr + 1);
+			
+		for (TDStringVector::iterator itr = WordChains.begin(); itr != WordChains.end(); /*++itr*/)
+			itr = ( GetPrev(*itr) != m_strEnd ? WordChains.erase(itr) : itr + 1);
+	}
+
+	if (WordChains[0].empty())
+	{
+		Form1->Memo1->Lines->Add("Не удалось выполнить задачу.");
+		return;
 	}
 
 	char* tempString = strdup(WordChains[0].c_str());
